@@ -17,7 +17,7 @@ def wordCount(data):
 
 
 def readData(filename, start, end):
-    if end < start:
+    if end <= start:
         raise Exception("Invalid input for data read")
 
     client = boto3.client("s3")
