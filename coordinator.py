@@ -2,9 +2,10 @@ import requests
 import sys
 import os
 import os.path
+import subprocess
 from subprocess import call
 
-lambda_instances = 4
+lambda_instances = 10
 replication = 1
 global_bucket = "s3://shelby-lambda-in"
 
@@ -12,6 +13,12 @@ def generate_payload(script_string,bytes_s, bytes_e, index):
     payload=" '{\"code\":" + "\"" + script_string + "\"" + "," + "\"globals\":" + \
     "{\"StartOffset\":" + str(bytes_s)+ "," + "\"EndOffset\":" + str(bytes_e) +\
     "," + "\"InstanceIndex\":" + str(index) + "}}'"
+    return payload
+
+def g_generate_payload(script_string,bytes_s, bytes_e, index):
+    payload=" --payload \'{\"InstanceIndex\":" + str(index) + "," + "\"StartOffset\":" + \
+    str(bytes_s)+ "," + "\"EndOffset\":" + str(bytes_e)+"}\' "
+    print payload
     return payload
 
 
@@ -66,16 +73,21 @@ def main():
 
     for i in range(lambda_instances):
         data_bytes_end = (i+1)*data_bytes_chunk
-        generate_payload(script_string,data_bytes_start,data_bytes_end,i)
+        #g_generate_payload(script_string,data_bytes_start,data_bytes_end,i)
         call_string = \
                 "aws lambda invoke \
                 --invocation-type RequestResponse \
-                --function-name lambda-map \
+                --function-name hello-lambda \
                 --region us-west-2 \
                 --log-type Tail" \
-                + generate_payload(script_string,data_bytes_start,data_bytes_end,i)
+                +\
+                str(g_generate_payload(script_string,data_bytes_start,data_bytes_end,i))\
+                + "outfile.txt"
+        #print call_string
+        #return 
+        print call_string
 
-        call(call_string,shell=True)
+        subprocess.Popen(call_string,shell=True)
 
 
         #call(["aws", "lambda", "invoke", 
