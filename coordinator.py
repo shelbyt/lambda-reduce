@@ -8,6 +8,17 @@ lambda_instances = 4
 replication = 1
 global_bucket = "s3://shelby-lambda-in"
 
+def generate_payload(script_string,bytes_s, bytes_e, index):
+    payload=" '{\"code\":" + "\"" + script_string + "\"" + "," + "\"globals\":" + \
+    "{\"StartOffset\":" + str(bytes_s)+ "," + "\"EndOffset\":" + str(bytes_e) +\
+    "," + "\"InstanceIndex\":" + str(index) + "}}'"
+    return payload
+
+
+# EndOffset
+# InstanceIndex
+
+
 def main():
     if (len(sys.argv) < 3):
         raise ValueError("Not enough arguments")
@@ -22,8 +33,8 @@ def main():
             raise ValueError("Script file is empty")
         else:
             # Read binary
-            in_script=(script_file, "rb")
-            script_string=script_open.read()
+            in_script=open(script_file, "rb")
+            script_string=in_script.read()
             in_script.close()
     if(not os.path.isfile(data_file)):
         raise ValueError("Invalid data file")
@@ -39,13 +50,44 @@ def main():
 
     data_bytes_start = 0
     data_bytes_end = 0
-    data_bytes_chunk = data_bytes/(lambda_instance/replication)
+    data_bytes_chunk = data_bytes/(lambda_instances/replication)
+
+    #call_string = \
+    #            "aws lambda invoke \
+    #            --invocation-type RequestResponse \
+    #            --function-name lambda-map \
+    #            --region us-west-2 \
+    #            --log-type Tail" \
+    #            +\
+    #            generate_payload(script_string,data_bytes_start,data_bytes_end,0)
+    #print call_string 
+    #return
+    #generate_payload(script_string, data_bytes_start,data_bytes_end,1)
 
     for i in range(lambda_instances):
         data_bytes_end = (i+1)*data_bytes_chunk
+        generate_payload(script_string,data_bytes_start,data_bytes_end,i)
+        call_string = \
+                "aws lambda invoke \
+                --invocation-type RequestResponse \
+                --function-name lambda-map \
+                --region us-west-2 \
+                --log-type Tail" \
+                + generate_payload(script_string,data_bytes_start,data_bytes_end,i)
 
-        call(["aws", "lambda", "invoke", data_file, global_bucket])
-        
+        call(call_string,shell=True)
+
+
+        #call(["aws", "lambda", "invoke", 
+        #"--invocation-type RequestResponse", 
+        #"--function-name lambda-map", 
+        #"--region us-west-2", 
+        #"--log-type Tail ", 
+        #"--payload"+generate_payload(script_string,\
+        #    data_bytes_start,data_bytes_end,i)])
+
+        print "Running index->" + str(i) 
+
         #run lambda here lambda(bytes_start,bytes_end)
         data_bytes_start = data_bytes_end
 
