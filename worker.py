@@ -13,7 +13,7 @@ def wordCount(data):
 		else:
 			wordDict[word] = 1
 
-	return wordDict.items()
+	return wordDict
 
 
 def readData(filename, start, end):
@@ -31,12 +31,12 @@ def readData(filename, start, end):
 	return result['Body'].read()
 
 
-def writeData(data, index):
+def writeData(dataDict, index):
 	tmpDataFile = "tmp" + str(index) + ".txt"
 
 	body = ""
-	for item in data:
-		body += str(item) + '\n'
+	for key in dataDict:
+		body += (key + "," + dataDict[key] + '\n')
 
 	client = boto3.client("s3")
 	result = client.put_object(
