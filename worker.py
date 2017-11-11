@@ -49,6 +49,7 @@ def writeData(dataDict, index):
 
 if __name__ == "__main__":
 	# read data from s3 bucket
+	FileName = "dream.txt"
 	data = readData(FileName, StartOffset, EndOffset)
 
 	# do the calculation
