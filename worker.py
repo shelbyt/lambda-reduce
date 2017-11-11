@@ -15,34 +15,33 @@ def wordCount(data):
 
 
 def readData(filename, start, end):
-	if end < start:
-	    raise Exception("Invalid input for data read")
+    if end < start:
+        raise Exception("Invalid input for data read")
 
-	client = boto3.client("s3")
-	result = client.get_object( \
-	    Bucket = S3_BUCKET, \
-	    Key = filename, \
-	    Range = "bytes=" + str(start) + "-" + str(end) \
+    client = boto3.client("s3")
+    result = client.get_object( \
+        Bucket = S3_BUCKET, \
+        Key = filename, \
+        Range = "bytes=" + str(start) + "-" + str(end) \
     )
-
-	# read the entire body
-	return result['Body'].read()
+    # read the entire body
+    return result['Body'].read()
 
 
 def writeData(dataDict, index):
-	tmpDataFile = "tmp" + str(index) + ".txt"
+    tmpDataFile = "tmp" + str(index) + ".txt"
 
-	body = ""
-	for key in dataDict:
-	    body += (key + "," + str(dataDict[key]) + '\n')
+    body = ""
+    for key in dataDict:
+        body += (key + "," + str(dataDict[key]) + '\n')
 
-	client = boto3.client("s3")
-	result = client.put_object( \
-	    Bucket = S3_BUCKET, \
-	    Key = tmpDataFile, \
-	    Body = body \
-	)
-	return
+    client = boto3.client("s3")
+    result = client.put_object( \
+        Bucket = S3_BUCKET, \
+        Key = tmpDataFile, \
+        Body = body \
+    )
+    return
 
 # read data from s3 bucket
 FileName = "dream.txt"
