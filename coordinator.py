@@ -16,6 +16,15 @@ def main():
     data_file = sys.argv[2]
     if(not os.path.isfile(script_file)):
         raise ValueError("Invalid script file")
+    else:
+        script_bytes = os.path.getsize(data_file)
+        if(script_bytes is 0):
+            raise ValueError("Script file is empty")
+        else:
+            # Read binary
+            in_script=(script_file, "rb")
+            script_string=script_open.read()
+            in_script.close()
     if(not os.path.isfile(data_file)):
         raise ValueError("Invalid data file")
     else:
@@ -34,6 +43,9 @@ def main():
 
     for i in range(lambda_instances):
         data_bytes_end = (i+1)*data_bytes_chunk
+
+        call(["aws", "lambda", "invoke", data_file, global_bucket])
+        
         #run lambda here lambda(bytes_start,bytes_end)
         data_bytes_start = data_bytes_end
 
