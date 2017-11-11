@@ -1,5 +1,7 @@
 
 import boto3
+import json
+import sys
 S3_BUCKET = "shelby-lambda-in"
 
 def wordCount(data):
@@ -42,6 +44,16 @@ def writeData(dataDict, index):
         Body = body \
     )
     return
+# parse json dictionary
+print sys.argv[1]
+print sys.argv[2]
+print sys.argv[3]
+
+
+InstanceIndex = sys.argv[1]
+StartOffset =   sys.argv[2]
+EndOffset =     sys.argv[3]
+
 
 # read data from s3 bucket
 FileName = "dream.txt"
